@@ -27,10 +27,12 @@ class Vana:
         headers = self.headers(initData)
         try:
             response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Periksa status kode HTTP
             return response.json()
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             self.log('Terjadi kesalahan saat memanggil API')
             print(e)
+            return None  # Mengembalikan None jika ada kesalahan
 
     def post_task_completion(self, initData, taskId, points):
         url = f'https://www.vanadatahero.com/api/tasks/{taskId}'
@@ -41,11 +43,12 @@ class Vana:
         }
         try:
             response = requests.post(url, json=payload, headers=headers)
+            response.raise_for_status()  # Periksa status kode HTTP
             if response.json().get('message') == 'Points limit exceeded':
                 self.log('Berhasil melakukan semua tugas untuk hari ini!')
                 return False
             return True
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             self.log('Terjadi kesalahan saat menyelesaikan tugas')
             print(e)
             return False
@@ -55,10 +58,12 @@ class Vana:
         headers = self.headers(initData)
         try:
             response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Periksa status kode HTTP
             return response.json().get('tasks', [])
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             self.log('Terjadi kesalahan saat mengambil daftar tugas')
             print(e)
+            return []  # Mengembalikan list kosong jika ada kesalahan
 
     def complete_pending_tasks(self, initData):
         tasks = self.get_tasks(initData)
@@ -76,15 +81,18 @@ class Vana:
                 print(f"========== Menjalankan akun {accountIndex} | {playerData['tgFirstName']} ==========")
                 self.log(f"Points: {playerData['points']}")
                 self.log(f"Multiplier: {playerData['multiplier']}")
-            while True:
-                taskCompleted = self.post_task_completion(initData, 1, round((50000.0 - 40000.0) * time.time(), 1))
-                if not taskCompleted:
-                    break
-                updatedPlayerData = self.get_player_data(initData)
-                if updatedPlayerData:
-                    self.log(f"Auto tap berhasil. Total Balance: {updatedPlayerData['points']}")
-                time.sleep(1)
-            self.complete_pending_tasks(initData)
+                
+                while True:
+                    points = round(40000.0 + (50000.0 - 40000.0) * time.time() % 1, 1)  # Menghitung poin acak
+                    taskCompleted = self.post_task_completion(initData, 1, points)
+                    if not taskCompleted:
+                        break
+                    updatedPlayerData = self.get_player_data(initData)
+                    if updatedPlayerData:
+                        self.log(f"Auto tap berhasil. Total Balance: {updatedPlayerData['points']}")
+                    time.sleep(1)
+                
+                self.complete_pending_tasks(initData)
         except Exception as e:
             self.log('Terjadi kesalahan saat memproses akun')
             print(e)
@@ -96,8 +104,7 @@ class Vana:
         for i, initData in enumerate(initDataList):
             self.process_account(initData, i + 1)
             self.wait_with_countdown(3)
-        self.wait_with_countdown(86400)
-
+        self.wait_with_countdown(86400)  # Tunggu 24 jam
 
 if __name__ == "__main__":
     vana = Vana()
