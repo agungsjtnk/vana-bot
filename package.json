@@ -1,14 +1,23 @@
 {
-  "name": "my-node-app",
+  "name": "tonclayton-bot",
   "version": "1.0.0",
-  "description": "A Node.js application that interacts with the tonclayton API.",
-  "main": "main.js",
+  "description": "Bot untuk mengelola akun di TonClayton",
+  "main": "index.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "pm2:start": "pm2 start index.js --name tonclayton-bot",
+    "pm2:stop": "pm2 stop tonclayton-bot",
+    "pm2:restart": "pm2 restart tonclayton-bot",
+    "pm2:delete": "pm2 delete tonclayton-bot"
   },
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^0.21.1"
   },
-  "author": "Your Name",
-  "license": "ISC"
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
