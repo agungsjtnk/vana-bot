@@ -5,7 +5,6 @@ const querystring = require("querystring");
 
 const BASE_URL = "https://tonclayton.fun";
 
-// Fungsi untuk membaca dari file
 async function readFromFile(filePath) {
     const fileStream = fs.createReadStream(filePath);
     const rl = readline.createInterface({
@@ -22,7 +21,6 @@ async function readFromFile(filePath) {
     return items;
 }
 
-// Fungsi untuk membuat klien API
 function createApiClient(initData, proxy) {
     const axiosConfig = {
         baseURL: BASE_URL,
@@ -54,7 +52,6 @@ function createApiClient(initData, proxy) {
     return axios.create(axiosConfig);
 }
 
-// Fungsi untuk mencatat log
 function log(message, color = "white") {
     const colors = {
         red: "\x1b[31m",
@@ -68,7 +65,6 @@ function log(message, color = "white") {
     console.log(colors[color] + message + "\x1b[0m");
 }
 
-// Fungsi untuk mengirim permintaan secara aman
 async function safeRequest(api, method, url, data, retries = 3) {
     let attempt = 0;
     while (attempt < retries) {
@@ -104,7 +100,6 @@ async function safeRequest(api, method, url, data, retries = 3) {
     }
 }
 
-// Fungsi-fungsi API
 const apiFunctions = {
     login: (api) => safeRequest(api, "post", "/api/user/login", {}),
     claimDailyReward: (api) => safeRequest(api, "post", "/api/user/daily-claim", {}),
@@ -124,7 +119,6 @@ const apiFunctions = {
     },
 };
 
-// Fungsi untuk menjalankan permainan dengan progres
 async function playGameWithProgress(api, gameName) {
     const tileSequence = [8, 16, 32, 64, 128, 256, 512, 1024];
     const duration = tileSequence.length;
@@ -144,7 +138,6 @@ async function playGameWithProgress(api, gameName) {
     return await safeRequest(api, "post", "/api/game/over-game", {});
 }
 
-// Fungsi untuk memproses akun
 async function processAccount(initData, firstName, proxy) {
     try {
         const api = createApiClient(initData, proxy);
@@ -191,6 +184,7 @@ async function processAccount(initData, firstName, proxy) {
                 log("Claiming task bot reward...", "yellow");
 
                 const rewardResponse = await apiFunctions.claimTaskBotReward(api);
+
                 log(`Bot task reward claimed: ${rewardResponse.claimed}`, "green");
             } else if (!taskBotStatus.bot) {
                 log("Bot task not available", "red");
@@ -269,7 +263,6 @@ async function processAccount(initData, firstName, proxy) {
     }
 }
 
-// Fungsi utama untuk menjalankan program
 async function main() {
     const tokens = await readFromFile("data.txt");
     const proxies = await readFromFile("proxy.txt");
@@ -290,5 +283,4 @@ async function main() {
     }
 }
 
-// Menjalankan fungsi utama
 main();
