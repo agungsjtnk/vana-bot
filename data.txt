@@ -1,3 +1,0 @@
-initData1
-initData2
-initData3
